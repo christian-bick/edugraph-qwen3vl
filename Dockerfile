@@ -26,8 +26,6 @@ COPY pyproject.toml .
 RUN curl -LsSf https://astral.sh/uv/install.sh | sh && \
     /root/.local/bin/uv pip install --system --no-cache .
 
-RUN uv add flash-attn deepspeed --no-build-isolation
-
 # --- Model Cache Layer ---
 # Define build-time argument for model size
 ARG MODEL_SIZE=4b
