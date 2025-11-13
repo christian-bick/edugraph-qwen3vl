@@ -1,5 +1,5 @@
 # Use an official NVIDIA CUDA base image - this version is compatible with our torch build
-FROM nvidia/cuda:12.1.1-cudnn8-devel-ubuntu22.04
+FROM nvidia/cuda:12.6.3-cudnn-devel-ubuntu22.04
 
 ENV DEBIAN_FRONTEND=noninteractive
 
@@ -25,6 +25,8 @@ COPY pyproject.toml .
 # We install and use uv in the same layer, and then install the project and its dependencies.
 RUN curl -LsSf https://astral.sh/uv/install.sh | sh && \
     /root/.local/bin/uv pip install --system --no-cache .
+
+RUN uv add flash-attn deepspeed --no-build-isolation
 
 # --- Model Cache Layer ---
 # Define build-time argument for model size
