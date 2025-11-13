@@ -4,7 +4,8 @@ requires-python = ">=3.12"
 resolution-markers = [
     "sys_platform == 'darwin'",
     "platform_machine == 'aarch64' and sys_platform == 'linux'",
-    "(platform_machine != 'aarch64' and sys_platform == 'linux') or (sys_platform != 'darwin' and sys_platform != 'linux')",
+    "sys_platform == 'win32'",
+    "(platform_machine != 'aarch64' and sys_platform == 'linux') or (sys_platform != 'darwin' and sys_platform != 'linux' and sys_platform != 'win32')",
 ]
 
 [[package]]
@@ -376,7 +377,7 @@ requires-dist = [
     { name = "torchcodec", specifier = "~=0.2" },
     { name = "torchvision", specifier = "~=0.21.0", index = "https://download.pytorch.org/whl/cu126" },
     { name = "transformers", git = "https://github.com/huggingface/transformers" },
-    { name = "trl", specifier = "~=0.7.11" },
+    { name = "trl", specifier = ">=0.9.0" },
 ]
 
 [[package]]
@@ -1639,7 +1640,8 @@ version = "0.21.0+cu126"
 source = { registry = "https://download.pytorch.org/whl/cu126" }
 resolution-markers = [
     "sys_platform == 'darwin'",
-    "(platform_machine != 'aarch64' and sys_platform == 'linux') or (sys_platform != 'darwin' and sys_platform != 'linux')",
+    "sys_platform == 'win32'",
+    "(platform_machine != 'aarch64' and sys_platform == 'linux') or (sys_platform != 'darwin' and sys_platform != 'linux' and sys_platform != 'win32')",
 ]
 dependencies = [
     { name = "numpy", marker = "platform_machine != 'aarch64' or sys_platform != 'linux'" },
@@ -1685,7 +1687,7 @@ dependencies = [
 
 [[package]]
 name = "trl"
-version = "0.7.11"
+version = "0.11.4"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "accelerate" },
@@ -1695,9 +1697,9 @@ dependencies = [
     { name = "transformers" },
     { name = "tyro" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/05/02/2be5a0072e55f667636778283c237c3fa531398a4a79b12879e8bfd6219e/trl-0.7.11.tar.gz", hash = "sha256:eac98ca3d3cbe6498dcce65e939e487b5f50c6c6358e557487303bcfad0aa4db", size = 130050, upload-time = "2024-02-16T08:06:18.3Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/07/39/a78c0608190cc412c49631dfb8c3e57f5c5b2fb0d79709071c992e707aa4/trl-0.11.4.tar.gz", hash = "sha256:de52a023fc35d580ab809fd74cd4f362a259e463bb968580e0e97e1b98a0fe79", size = 307304, upload-time = "2024-10-15T08:44:58.602Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/02/85/3eaa8df1d1b55b3390fa834d80a8011e2b5147e328b44b5cef776f2b08d8/trl-0.7.11-py3-none-any.whl", hash = "sha256:640235f43e734af4d37afeccd56831764df76ac09529df7f884c1809bdeeac36", size = 155282, upload-time = "2024-02-16T08:06:16.424Z" },
+    { url = "https://files.pythonhosted.org/packages/e4/dd/d2cf3dbc1013cee71ceef584f5ab69915fc05d209ef1e276f8652058c350/trl-0.11.4-py3-none-any.whl", hash = "sha256:071d64164c152ef65b44d15f878793b28d3340310c9e157dc3608bbe5fa549a9", size = 316575, upload-time = "2024-10-15T08:44:57.147Z" },
 ]
 
 [[package]]

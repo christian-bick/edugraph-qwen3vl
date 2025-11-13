@@ -94,8 +94,11 @@ def main():
             ])
         return {"messages": messages}
 
+    # Get the columns to remove, but be sure to keep the 'image' column
+    columns_to_remove = [col for col in dataset.column_names if col != 'image']
+    
     # Apply the simple formatting
-    processed_dataset = dataset.map(format_chat_messages, batched=True, remove_columns=dataset.column_names)
+    processed_dataset = dataset.map(format_chat_messages, batched=True, remove_columns=columns_to_remove)
 
     if max_train_samples:
         processed_dataset = processed_dataset.select(range(max_train_samples))
@@ -110,7 +113,7 @@ def main():
         logging_steps=10,
         save_strategy="epoch",
         # Evaluation is removed as per the improvement suggestions
-        fp16=True, 
+        bf16=True, 
         max_grad_norm=1.0,
     )
 
