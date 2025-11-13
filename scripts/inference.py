@@ -5,13 +5,14 @@ import json
 
 from transformers import (
     AutoProcessor,
-    Qwen2_5_VLForConditionalGeneration,
+    Qwen3VLForConditionalGeneration,
 )
 from peft import PeftModel
 
 def main(args):
     # --- Configuration ---
-    base_model_id = "Qwen/Qwen2.5-VL-3B-Instruct"
+    # Update to a specific Qwen3-VL model
+    base_model_id = "Qwen/Qwen3-VL-4B-Instruct"
     adapter_path = "out/adapters/multimodal_adapter"
 
     print("--- Loading model and adapter for inference ---")
@@ -20,15 +21,15 @@ def main(args):
     processor = AutoProcessor.from_pretrained(base_model_id, trust_remote_code=True)
 
     # Load the base model without quantization
-    model = Qwen2_5_VLForConditionalGeneration.from_pretrained(
+    model = Qwen3VLForConditionalGeneration.from_pretrained(
         base_model_id,
         torch_dtype=torch.bfloat16,
         device_map="auto",
         trust_remote_code=True
     )
 
-
     # Load the LoRA adapter and merge it into the base model
+    print(f"Loading adapter from {adapter_path}...")
     model = PeftModel.from_pretrained(model, adapter_path)
     model = model.merge_and_unload()
     print("Adapter merged successfully.")
@@ -51,16 +52,14 @@ def main(args):
     inputs = processor(text=[text_prompt], images=[args.image_path], return_tensors="pt").to(model.device)
 
     # Generate the token IDs
+    input_ids_len = inputs['input_ids'].shape[1]
     generated_ids = model.generate(**inputs, max_new_tokens=512)
-
-    # Decode the generated tokens, skipping special tokens and the prompt
-    response = processor.batch_decode(generated_ids, skip_special_tokens=True)[0]
     
-    # The response includes the prompt, so we need to extract just the assistant's part.
-    # This is a bit brittle and depends on the exact template format.
-    assistant_response = response.split("assistant\n")[1].strip()
+    # Modernized response parsing: decode only the newly generated tokens
+    new_tokens = generated_ids[0, input_ids_len:]
+    assistant_response = processor.decode(new_tokens, skip_special_tokens=True)
 
-    print("\n--- Generated Classification (Raw String) ---")
+    print("\n--- Generated Classification ---")
     print(assistant_response)
 
 

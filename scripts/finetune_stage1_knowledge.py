@@ -7,7 +7,7 @@ from transformers import (
     AutoProcessor,
     BitsAndBytesConfig,
     TrainingArguments,
-    Qwen2_5_VLForConditionalGeneration,
+    Qwen3VLForConditionalGeneration,
     DataCollatorForLanguageModeling,
 )
 from peft import get_peft_model
@@ -20,12 +20,14 @@ def main():
 
     # --- Configuration ---
     run_mode = os.environ.get("RUN_MODE", "train")
-    model_size = os.environ.get("MODEL_SIZE", "3b")
+    # Default to a reasonable size like 4B if not specified
+    model_size = os.environ.get("MODEL_SIZE", "4b") 
     
     # Get model and training configurations
     model_config = get_config(model_size)
     stage1_config = model_config.stage1
-    base_model_id = f"Qwen/Qwen2.5-VL-{model_size.upper()}-Instruct"
+    # Update to Qwen3-VL model
+    base_model_id = f"Qwen/Qwen3-VL-{model_size.upper()}-Instruct"
     
     text_dataset_path = "ontology_qa_v3.jsonl"
     knowledge_adapter_path = "out/adapters/knowledge_adapter"
@@ -55,8 +57,8 @@ def main():
         bnb_4bit_use_double_quant=True
     )
 
-    # Load base model
-    model = Qwen2_5_VLForConditionalGeneration.from_pretrained(
+    # Load base model - updated to Qwen3VLForConditionalGeneration
+    model = Qwen3VLForConditionalGeneration.from_pretrained(
         base_model_id,
         quantization_config=bnb_config,
         device_map="auto",
@@ -73,15 +75,19 @@ def main():
         dataset = dataset.select(range(max_train_samples))
 
     def format_qa_dataset(examples):
-        # This function now handles the entire formatting and tokenization process.
+        # Modernized chat template application
         instructions = examples['instruction']
         outputs = examples['output']
         texts = []
         for instruction, output in zip(instructions, outputs):
-            text = f"<|im_start|>user\n{instruction}<|im_end|>\n<|im_start|>assistant\n{output}<|im_end|>"
+            messages = [
+                {"role": "user", "content": instruction},
+                {"role": "assistant", "content": output}
+            ]
+            text = tokenizer.apply_chat_template(messages, tokenize=False, add_generation_prompt=False)
             texts.append(text)
         # Tokenize the formatted texts
-        return tokenizer(texts, truncation=True, padding="max_length", max_length=512)
+        return tokenizer(texts, truncation=True, padding="max_length")
 
     processed_dataset = dataset.map(format_qa_dataset, batched=True, remove_columns=['instruction', 'output'], num_proc=1)
 
@@ -107,7 +113,8 @@ def main():
         model=model,
         args=training_args,
         train_dataset=processed_dataset,
-        data_collator=data_collator, # Use the text-only collator
+        dataset_text_field="text", # Specify the text field for SFTTrainer
+        data_collator=data_collator,
     )
     print("SFTTrainer initialized.")
 
